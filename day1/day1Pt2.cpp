@@ -2,7 +2,46 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "stringParser.h"
+
+bool isNumber(std::string str, int pos, std::string numberStr) {
+  for(int i = 0; i < numberStr.size(); i++) {
+    if(str[pos + i] != numberStr[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+char parseStrNumber(std::string str, int pos) {
+  switch (str[pos]) {
+    case 'z': 
+      if(isNumber(str, pos, "zero")) return '0';
+      break;
+    case 'o': 
+      if(isNumber(str, pos, "one")) return '1';
+      break;
+    case 't': 
+      if(isNumber(str, pos, "two")) return '2';
+      else if (isNumber(str, pos, "three")) return '3';
+      break;
+    case 'f': 
+      if(isNumber(str, pos, "four")) return '4';
+      else if (isNumber(str, pos, "five")) return '5';
+      break;
+    case 's': 
+      if(isNumber(str, pos, "six")) return '6';
+      else if (isNumber(str, pos, "seven")) return '7';
+      break;
+    case 'e': 
+      if(isNumber(str, pos, "eight")) return '8';
+      break;
+    case 'n':
+      if(isNumber(str, pos, "nine")) return '9';
+      break;
+    default: return '-';
+  }
+  return '-';
+}
 
 // Function to build the number to be added to the total calibration
 void buildNumber(char n, std::string &calibration, bool &firstEncounter, char &tempNumber) {
