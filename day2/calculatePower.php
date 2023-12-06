@@ -1,6 +1,6 @@
 <?php
 
-function calculatePower($rounds) {
+function calculatePower(Array $rounds): int {
   $maxCount = ["blue" => 0, "red" => 0, "green" => 0];
   $power = 1;
 

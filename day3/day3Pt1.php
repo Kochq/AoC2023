@@ -9,7 +9,7 @@ $dir = [
 
 $sum = 0;
 
-function getAdjacent($i, $j, $coords, $file) {
+function getAdjacent(int $i, int $j, array $coords, array $file): ?string {
   [$x, $y] = $coords;
   if($i+$x < 0 || $i+$x >= count($file)) return null;
   if($j+$y < 0 || $j+$y >= strlen($file[$i+$x])) return null;
