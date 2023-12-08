@@ -1,5 +1,6 @@
 <?php
-error_reporting(E_ALL);
+include "fun.php";
+
 $file = file("input");
 
 $dir = [
@@ -9,33 +10,7 @@ $dir = [
 ];
 
 $sum = 0;
-$gearRatio = array();
-
-function getAdjacent(int $i, int $j, array $coords, array $file): ?string {
-  [$x, $y] = $coords;
-  if($i+$x < 0 || $i+$x >= count($file)) return null;
-  if($j+$y < 0 || $j+$y >= strlen($file[$i+$x])) return null;
-  return $file[$i + $x][$j + $y];
-}
-
-function getFullPartNumber(int $x, int $y, string $partNumber): string {
-  global $file;
-  $defNumber = $partNumber;
-
-  $defY = $y;
-
-  while(strlen($file[$x]) > $y+1 && is_numeric($file[$x][$y+1])) {
-    $partNumber = $partNumber . $file[$x][$y+1];
-    $y++;
-  }
-  while(($defY-1) >= 0 && is_numeric($file[$x][$defY-1])) {
-    $partNumber = $file[$x][$defY-1] . $partNumber;
-    $defY--;
-  }
-
-
-  return $partNumber;
-}
+$gearRatios = array();
 
 for($i = 0; $i < count($file); $i++) {
   for($j = 0; $j < strlen($file[$i]); $j++) {
@@ -45,50 +20,37 @@ for($i = 0; $i < count($file); $i++) {
       $number1;
       $number2;
 
+      // Check all the adjacent numbers to the *
       for($k = 0; $k < count($dir); $k++) {
         $adj = getAdjacent($i, $j, $dir[$k], $file);
         if(is_numeric($adj)) {
-          if($prevFoundedIn[0] != -1) {
-            [$x1, $y1] = $dir[$prevFoundedIn[0]];
-            [$x2, $y2] = $dir[$k];
-            if($x1 == $x2 && abs($y1 - $y2) == 1) {
-              $prevFoundedIn[0] = $k;
-              continue;
-            }
-          }
-          if($prevFoundedIn[1] != -1) {
-            [$x1, $y1] = $dir[$prevFoundedIn[1]];
-            [$x2, $y2] = $dir[$k];
-            if($x1 == $x2 && abs($y1 - $y2) == 1) {
-              $prevFoundedIn[1] = $k;
-              continue;
-            }
-          }
-          $prevFoundedIn[$partNumbers] = $k;
+          if (isTheSameNumber($prevFoundedIn[0], $k)) continue;
+          if (isTheSameNumber($prevFoundedIn[1], $k)) continue;
+
+          // Save the position of the last number found
+          $prevFoundedIn[$partNumbers] = $k; 
           $partNumbers++;
-          $x = $i + $dir[$k][0];
+          // Coordinates of the adjacent number
+          $x = $i + $dir[$k][0]; 
           $y = $j + $dir[$k][1];
 
-          $tempN = getFullPartNumber($x, $y, $adj);
-          if($tempN == "531") {
-            echo "una vez\n";
-          }
+          $fullPartNumber = getFullPartNumber($x, $y, $adj);
 
           if($partNumbers < 2) {
-            $number1 = $tempN;
+            $number1 = $fullPartNumber;
           } else {
-            $number2 = $tempN;
+            $number2 = $fullPartNumber;
           }
         }
-      }
+      } // End of the for loop, if we have exactly 2 numbers, we can calculate the gear ratio
       if($partNumbers == 2) {
-        $gearRatio[] = $number1 * $number2;
+        $gearRatios[] = $number1 * $number2;
       }
-    } 
+    }
   }
 }
 
-foreach($gearRatio as $n) {
+foreach($gearRatios as $n) {
   $sum += $n;
 }
 
