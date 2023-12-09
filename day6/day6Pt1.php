@@ -32,11 +32,7 @@ function pushTheButton(object $input, int $secs): bool {
   $timeLeft = $input->time - $secs;
   $mmTraveled = $velocity * $timeLeft;
 
-  if($mmTraveled >= $input->distance) {
-    return true;
-  } else {
-    return false;
-  }
+  return $mmTraveled >= $input->distance;
 }
 
 $races = parseInput($input);
