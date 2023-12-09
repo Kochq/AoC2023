@@ -1,6 +1,6 @@
 <?php 
 
-include 'fun.php';
+include 'funPt2.php';
 
 $input = file('input', FILE_IGNORE_NEW_LINES);
 
