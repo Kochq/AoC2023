@@ -5,7 +5,7 @@ $games = array_map(fn($line) => explode(' ', $line), $input);
 $rank = ["fiveOfKind" => 7, "fourOfKind" => 6, "fullHouse" => 5, "threeOfKind" => 4, "twoPairs" => 3, "onePair" => 2, "highestCard" => 1];
 $total = 0;
 
-function getGameType(string $hand) {
+function getGameType(string $hand): array {
     $ocurrences = [
         "A" => 0,
         "K" => 0,
@@ -26,112 +26,131 @@ function getGameType(string $hand) {
         $ocurrences[$hand[$i]]++;
     }
 
-    $jokers = $ocurrences["J"];
-    if($jokers == 5) {
-        return "fiveOfKind";
-    }
-    if($jokers == 4) {
-        return "fourOfKind";
-    }
     $lastFounded = 0;
+    $jokers = $ocurrences["J"];
     foreach($ocurrences as $c => $ocurrence) {
         if($c == "J") continue;
-
         if($ocurrence == 5) {
-            return "fiveOfKind";
+            return ["fiveOfKind", $jokers];
         }
-
         if($ocurrence == 4) {
-            if($jokers > 0) {
-                return "fiveOfKind";
-            }
-            return "fourOfKind";
+            return ["fourOfKind", $jokers];
         }
-
         if($ocurrence == 3) {
-            if($jokers == 2) {
-                return "fiveOfKind";
-            }
-            if($jokers == 1) {
-                return "fourOfKind";
-            }
             if($lastFounded == 2) {
-                return "fullHouse";
+                return ["fullHouse", $jokers];
             }
             $lastFounded = 3;
         }
-
         if($ocurrence == 2) {
-            if($jokers == 3) {
-                return "fiveOfKind";
-            }
-            if($jokers == 2) {
-                return "fourOfKind";
-            }
             if($lastFounded == 3) {
-                return "fullHouse";
+                return ["fullHouse", $jokers];
             }
             if($lastFounded == 2) {
-                if($jokers == 1) {
-                    return "fullHouse";
-                }
-                return "twoPairs";
+                return ["twoPairs", $jokers];
             }
             $lastFounded = 2;
         }
-
+    }
+    if($lastFounded == 3) {
+        return ["threeOfKind", $jokers];
+    }
+    if($lastFounded == 2) {
+        return ["onePair", $jokers];
     }
 
-
-    if($jokers == 5) {
-        return "fiveOfKind";
-    }
-    if($jokers == 4) {
-        return "fiveOfKind";
-    }
-    if($jokers == 3) {
-        if($lastFounded == 2) {
-            return "fiveOfKind";
-        }
-        return "fourOfKind";
-    }
-    if($jokers == 2) {
-        if($lastFounded == 3) {
-            return "fiveOfKind";
-        }
-        if($lastFounded == 2) {
-            return "fourOfKind";
-        }
-        return "threeOfKind";
-    }
-    if($jokers == 0) {
-        if($lastFounded == 3) {
-            return "threeOfKind";
-        }
-        if($lastFounded == 2) {
-            return "onePair";
-        }
-        return "highestCard";
-    }
-    if($jokers == 1) {
-        if($lastFounded == 3) {
-            return "fourOfKind";
-        }
-        if($lastFounded == 2) {
-            return "threeOfKind";
-        }
-        return "onePair";
-    }
-
-    echo "EH? $hand $jokers\n";
-
-    return "onePair";
+    return ["highestCard", $jokers];
 }
 
 foreach($games as &$game) {
     [$hand, $bid] = $game;
     $bid = intval($bid);
-    $game = [$hand, $bid, $rank[getGameType($hand)]];
+    $info = getGameType($hand);
+    $gameType = $info[0];
+    $jokers = $info[1];
+    echo "\n";
+
+    echo $hand . " - Before: " . $gameType . " - Jokers: " . $jokers;
+
+
+    if($jokers == 0 || $gameType == "fiveOfKind") {
+        echo " - After: " . $gameType;
+        $game = [$hand, $bid, $rank[$gameType]];
+        continue;
+    }
+
+    if($jokers == 1) {
+        if($gameType == "highestCard") {
+            echo " - After: " . "onePair";
+            $game = [$hand, $bid, $rank["onePair"]];
+            continue;
+        }
+        if($gameType == "onePair") {
+            echo " - After: " . "threeOfKind";
+            $game = [$hand, $bid, $rank["threeOfKind"]];
+            continue;
+        }
+        if($gameType == "twoPairs") {
+            echo " - After: " . "fullHouse";
+            $game = [$hand, $bid, $rank["fullHouse"]];
+            continue;
+        }
+        if($gameType == "threeOfKind") {
+            echo " - After: " . "fourOfKind";
+            $game = [$hand, $bid, $rank["fourOfKind"]];
+            continue;
+        }
+        if($gameType == "fourOfKind") {
+            echo " - After: " . "fiveOfKind";
+            $game = [$hand, $bid, $rank["fiveOfKind"]];
+            continue;
+        }
+    }
+
+    if($jokers == 2) {
+        if($gameType == "highestCard") {
+            echo " - After: " . "threeOfKind";
+            $game = [$hand, $bid, $rank["threeOfKind"]];
+            continue;
+        }
+        if($gameType == "onePair") {
+            echo " - After: " . "fourOfKind";
+            $game = [$hand, $bid, $rank["fourOfKind"]];
+            continue;
+        }
+        if($gameType == "threeOfKind") {
+            echo " - After: " . "fiveOfKind";
+            $game = [$hand, $bid, $rank["fiveOfKind"]];
+            continue;
+        }
+    }
+
+    if($jokers == 3) {
+        if($gameType == "highestCard") {
+            echo " - After: " . "fourOfKind";
+            $game = [$hand, $bid, $rank["fourOfKind"]];
+            continue;
+        }
+        if($gameType == "onePair") {
+            echo " - After: " . "fiveOfKind";
+            $game = [$hand, $bid, $rank["fiveOfKind"]];
+            continue;
+        }
+    }
+
+    if($jokers == 4) {
+        echo " - After: " . "fiveOfKind";
+        $game = [$hand, $bid, $rank["fiveOfKind"]];
+        continue;
+    }
+
+    if($jokers == 5) {
+        echo " - After: " . "fiveOfKind";
+        $game = [$hand, $bid, $rank["fiveOfKind"]];
+        continue;
+    }
+
+    $game = [$hand, $bid, $rank[$gameType]];
 }
 
 $power = [
